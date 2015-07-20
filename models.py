@@ -24,6 +24,7 @@ class Profile(ndb.Model):
     mainEmail = ndb.StringProperty()
     teeShirtSize = ndb.StringProperty(default='NOT_SPECIFIED')
     conferenceKeysToAttend = ndb.StringProperty(repeated=True)
+    sessionWishlistKeys = ndb.StringProperty(repeated=True)
 
 # needed for conference registration
 class BooleanMessage(messages.Message):
