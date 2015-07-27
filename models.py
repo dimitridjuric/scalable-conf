@@ -152,3 +152,10 @@ class SessionTypeForm(messages.Message):
 class SessionSpeakerForm(messages.Message):
     """form for queries of sessions by speaker"""
     speaker = messages.StringField(1)
+    
+class SessionQueryForm(messages.Message):
+    """Session time query inbound form message"""
+    websafeConferenceKey = messages.StringField(1)
+    field = messages.StringField(2)
+    operator = messages.StringField(3)
+    value = messages.StringField(4)

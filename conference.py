@@ -41,6 +41,7 @@ from models import SessionForm
 from models import SessionForms
 from models import SessionTypeForm
 from models import SessionSpeakerForm
+from models import SessionQueryForm
 
 from settings import WEB_CLIENT_ID
 from utils import getUserId
@@ -261,7 +262,6 @@ class ConferenceApi(remote.Service):
             raise endpoints.NotFoundException(
                 'No conference found with key: %s' % request.websafeConferenceKey)
         prof = conf.key.parent().get()
-        print 'in getConference----------------------------------'
         # return ConferenceForm
         return self._copyConferenceToForm(conf, getattr(prof, 'displayName'))
 
@@ -271,7 +271,6 @@ class ConferenceApi(remote.Service):
             name='queryConferences')
     def queryConferences(self, request):
         """Query for conferences."""
-        print "we are quering conferences"
         conferences = self._getQuery(request)
 
         # need to fetch organiser displayName from profiles
@@ -328,7 +327,6 @@ class ConferenceApi(remote.Service):
                                                    filtr["operator"], filtr["value"])
             q = q.filter(formatted_query)
         return q
-
 
     def _formatFilters(self, filters):
         """Parse, check validity and format user supplied filters."""
@@ -742,16 +740,17 @@ class ConferenceApi(remote.Service):
             path='wishlist/remove/{sessionKey}',
             http_method='DELETE', name='removeSessionFromWishlist')
     def removeSessionFromWishlist(self, request):
+        """Remove a session from the user's wishlist."""
         return self._wishlistAddition(request, reg=False)
 
     @endpoints.method(message_types.VoidMessage, SessionForms,
             path='sessions/wishlist',
             http_method='GET', name='getSessionsInWishlist')
     def getSessionInWishlist(self, request):
-        """Return requested conference (by websafeConferenceKey)."""
-        
+        """Return sessions in wishlist."""
+
         prof = self._getProfileFromUser()  # get user Profile
-        # test is session wishlist exists
+        # test if session wishlist exists
         if hasattr(prof, 'sessionWishlistKeys'):
             session_keys = [ndb.Key(urlsafe=sk) for sk in prof.sessionWishlistKeys]
             sessions = ndb.get_multi(session_keys)
@@ -762,6 +761,38 @@ class ConferenceApi(remote.Service):
                                    for session in sessions]
                             )
 
+# - - - Additional Queries - - - - - - - - - - - - - - - - - - - -
+
+    @endpoints.method(SessionQueryForm, SessionForms,
+                      path='querySessions',
+                      http_method='POST',
+                      name='querySessions')
+    def querySessions(self, request):
+        """Query for sessions."""
+        sessions = self._getSessionQuery(request)
+
+        # # need to fetch organiser displayName from profiles
+        # # get all keys and use get_multi for speed
+        # organisers = [(ndb.Key(Profile, conf.organizerUserId)) for conf in conferences]
+        # profiles = ndb.get_multi(organisers)
+        # 
+        # # put display names in a dict for easier fetching
+        # names = {}
+        # for profile in profiles:
+        #     names[profile.key.id()] = profile.displayName
+
+        # return individual SessionForm object per Conference
+        return SessionForms(
+                items=[self._copySessionToForm(session) for session in sessions]
+                )
+
+    def _getSessionQuery(self, request):
+        """Return formatted query from the submitted filters."""
+        ck = ndb.Key(urlsafe=request.websafeConferenceKey)
+        q = Session.query(ancestor=ck)
+        q = q.filter(ndb.query.FilterNode(request.field, request.operator, request.value))
+        
+        return q
 
 # registers API
 api = endpoints.api_server([ConferenceApi]) 

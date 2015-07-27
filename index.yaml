@@ -55,3 +55,8 @@ indexes:
   - name: topics
   - name: month
   - name: name
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: duration
