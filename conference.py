@@ -636,6 +636,11 @@ class ConferenceApi(remote.Service):
             http_method='POST', name='createSession')
     def createSession(self, request):
         """Create new session in conference."""
+        # check if any speaker appear in more than one session for this conference
+        conferenceSpeakers = self._getSpeakers(request.websafeConferenceKey)
+        for speaker in request.speaker:
+            if speaker in conferenceSpeakers:
+                memcache.set('featuredSpeaker', speaker)
         return self._createSessionObject(request)
     
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
@@ -876,6 +881,19 @@ class ConferenceApi(remote.Service):
                 items=[self._copySessionToForm(session) for session in sessions]
                 )
 
+    def _getSpeakers(self, wsck):
+        # get Conference object from request
+        conf = ndb.Key(urlsafe=wsck).get()
+        if not conf:
+            raise endpoints.NotFoundException(
+                'No conference found with key: %s' % wsck)
+        
+        # get the speakers for this conference
+        sessions = Session.query(ancestor=conf.key).fetch(projection=[Session.speaker])
+        # flattening the list of list of speakers
+        speakers = [speaker for session in sessions for speaker in session.speaker]
+        return speakers
+
     @endpoints.method(CONF_GET_REQUEST, SpeakersForm,
             path='conference/{websafeConferenceKey}/speakers',
             http_method='GET', name='getConferenceSpeakers')
@@ -883,18 +901,20 @@ class ConferenceApi(remote.Service):
         """Return a list of speakers for all sessions of a conference
         (by websafeConferenceKey)."""
         
-        # get Conference object from request
-        conf = ndb.Key(urlsafe=request.websafeConferenceKey).get()
-        if not conf:
-            raise endpoints.NotFoundException(
-                'No conference found with key: %s' % request.websafeConferenceKey)
-        
-        # get the speakers for this conference
-        sessions = Session.query(ancestor=conf.key).fetch(projection=[Session.speaker])
-        # flattening the list of list of speakers
-        speakers = [speaker for session in sessions for speaker in session.speaker]
+        speakers = self._getSpeakers(request.websafeConferenceKey)
         # copy the list to a form
         form = SpeakersForm(speaker=speakers)
+        form.check_initialized()
+        return form
+
+    @endpoints.method(CONF_GET_REQUEST, StringMessage,
+            path='conference/{websafeConferenceKey}/featuredSpeaker',
+            http_method='GET', name='getFeaturedSpeaker')
+    def getFeaturedSpeaker(self, request):
+        """Returns the featured speaker stored in memcache"""
+        speaker = memcache.get('featuredSpeaker')
+        # copy the list to a form
+        form = StringMessage(data=speaker)
         form.check_initialized()
         return form
 
