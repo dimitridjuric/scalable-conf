@@ -124,9 +124,9 @@ class Session(ndb.Model):
     name = ndb.StringProperty(required=True)
     highlights = ndb.TextProperty()
     speaker = ndb.StringProperty(repeated=True)
-    start_time = ndb.TimeProperty()
+    start_time = ndb.IntegerProperty()
     date = ndb.DateProperty()
-    duration = ndb.StringProperty()
+    duration = ndb.IntegerProperty()
     session_type = ndb.StringProperty()
     location = ndb.StringProperty()
     
@@ -137,7 +137,7 @@ class SessionForm(messages.Message):
     speaker = messages.StringField(3, repeated=True)
     start_time = messages.StringField(4)
     date = messages.StringField(5)
-    duration = messages.StringField(6)
+    duration = messages.IntegerField(6)
     session_type = messages.StringField(7)
     location = messages.StringField(8)
     
@@ -154,8 +154,20 @@ class SessionSpeakerForm(messages.Message):
     speaker = messages.StringField(1)
     
 class SessionQueryForm(messages.Message):
-    """Session time query inbound form message"""
+    """Session query inbound form message"""
     websafeConferenceKey = messages.StringField(1)
     field = messages.StringField(2)
     operator = messages.StringField(3)
     value = messages.StringField(4)
+    
+class DoubleSessionQueryForm(messages.Message):
+    websafeConferenceKey = messages.StringField(1)
+    field1 = messages.StringField(2)
+    operator1 = messages.StringField(3)
+    value1 = messages.StringField(4)
+    field2 = messages.StringField(5)
+    operator2 = messages.StringField(6)
+    value2 = messages.StringField(7)
+    
+class SpeakersForm(messages.Message):
+    speaker = messages.StringField(1, repeated=True)
