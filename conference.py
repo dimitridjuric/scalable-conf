@@ -602,7 +602,7 @@ class ConferenceApi(remote.Service):
                 data[df] = SESSION_DEFAULTS[df]
                 setattr(request, df, SESSION_DEFAULTS[df])
 
-        # convert datetimes from strings to Integers; 
+        # convert time to integer, date to datetime
         if data['start_time']:
             data['start_time'] = int(data['start_time'])
         if data['date']:
@@ -912,7 +912,7 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getFeaturedSpeaker')
     def getFeaturedSpeaker(self, request):
         """Returns the featured speaker stored in memcache"""
-        speaker = memcache.get('featuredSpeaker')
+        speaker = memcache.get('featuredSpeaker') or ''
         # copy the list to a form
         form = StringMessage(data=speaker)
         form.check_initialized()

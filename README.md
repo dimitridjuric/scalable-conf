@@ -1,33 +1,17 @@
-App Engine application for the Udacity training course.
+###Scalable Conf
+##Udacity Fullstack Nanodegree Project 4
 
-## Products
-- [App Engine][1]
+##Sessions
 
-## Language
-- [Python][2]
+I've added a Session ndb class to models.py.
+The fields are:
+**name**, **speaker**, **session_type**, **location** are StringProperty type. we want these field to be indexed. **speaker** is repeated as there can be multiple speakers for a session.
+**highlights** is of TexProperty type, we don't need this field to be indexed.
+**start_time** is an IntegerProperty type. I tried to use a TimeProperty but ran into problems as ndb saves those a differently to standard python datetime.time(). This added complexity and made the application harder to maintain with a lot of code just used to convert times for the queries. I'm using an integer representation of 24h time HHMM (e.g 1245 is 12:45).
+**date** is a DateProperty and **duration** is IntegerProperty in number of minutes.
 
-## APIs
-- [Google Cloud Endpoints][3]
+The ProtoRPC message classes are **SessionForm** a copy of the session class in string format, and **SessionForms** a repeated SessionForm message.
 
-## Setup Instructions
-1. Update the value of `application` in `app.yaml` to the app ID you
-   have registered in the App Engine admin console and would like to use to host
-   your instance of this sample.
-1. Update the values at the top of `settings.py` to
-   reflect the respective client IDs you have registered in the
-   [Developer Console][4].
-1. Update the value of CLIENT_ID in `static/js/app.js` to the Web client ID
-1. (Optional) Mark the configuration files as unchanged as follows:
-   `$ git update-index --assume-unchanged app.yaml settings.py static/js/app.js`
-1. Run the app with the devserver using `dev_appserver.py DIR`, and ensure it's running by visiting
-   your local server's address (by default [localhost:8080][5].)
-1. Generate your client library(ies) with [the endpoints tool][6].
-1. Deploy your application.
+I've decided not to implement the speaker as a separate class because the speaker entity would have to be created prior to creating the session, not something particularly user friendly.
 
-
-[1]: https://developers.google.com/appengine
-[2]: http://python.org
-[3]: https://developers.google.com/appengine/docs/python/endpoints/
-[4]: https://console.developers.google.com/
-[5]: https://localhost:8080/
-[6]: https://developers.google.com/appengine/docs/python/endpoints/endpoints_tool
+ 

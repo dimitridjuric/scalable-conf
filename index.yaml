@@ -92,7 +92,79 @@ indexes:
 - kind: Session
   ancestor: yes
   properties:
+  - name: location
+  - name: date
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: location
+  - name: duration
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: location
+  - name: start_time
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: name
+  - name: date
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: name
+  - name: duration
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: name
+  - name: start_time
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: session_type
+  - name: date
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: session_type
+  - name: duration
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: session_type
+  - name: start_time
+
+- kind: Session
+  ancestor: yes
+  properties:
   - name: speaker
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: speaker
+  - name: date
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: speaker
+  - name: duration
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: speaker
+  - name: start_time
 
 - kind: Session
   ancestor: yes
@@ -115,3 +187,9 @@ indexes:
   properties:
   - name: start_time
   - name: duration
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: type
+  - name: date
