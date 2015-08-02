@@ -640,7 +640,7 @@ class ConferenceApi(remote.Service):
         conferenceSpeakers = self._getSpeakers(request.websafeConferenceKey)
         for speaker in request.speaker:
             if speaker in conferenceSpeakers:
-                memcache.set('featuredSpeaker', speaker)
+                memcache.set('featuredSpeaker', (speaker, request.name))
         return self._createSessionObject(request)
     
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
@@ -845,7 +845,7 @@ class ConferenceApi(remote.Service):
             value2d = value2.date()
         elif request.field2 in ['start_time', 'duration']:
             value2 = int(request.value2)
-            value2d = value2.time()
+            value2d = value2
         else:
             value2 = request.value2
             value2d = value2
@@ -912,9 +912,9 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getFeaturedSpeaker')
     def getFeaturedSpeaker(self, request):
         """Returns the featured speaker stored in memcache"""
-        speaker = memcache.get('featuredSpeaker') or ''
+        speaker, sessionName = memcache.get('featuredSpeaker') or ''
         # copy the list to a form
-        form = StringMessage(data=speaker)
+        form = StringMessage(data=speaker+' - '+sessionName)
         form.check_initialized()
         return form
 

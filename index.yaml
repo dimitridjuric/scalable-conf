@@ -129,6 +129,11 @@ indexes:
   ancestor: yes
   properties:
   - name: session_type
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: session_type
   - name: date
 
 - kind: Session
