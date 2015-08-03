@@ -161,6 +161,7 @@ class SessionQueryForm(messages.Message):
     value = messages.StringField(4)
     
 class DoubleSessionQueryForm(messages.Message):
+    """Session double query inbound form message""" 
     websafeConferenceKey = messages.StringField(1)
     field1 = messages.StringField(2)
     operator1 = messages.StringField(3)
@@ -170,4 +171,5 @@ class DoubleSessionQueryForm(messages.Message):
     value2 = messages.StringField(7)
     
 class SpeakersForm(messages.Message):
+    """Session speaker list outbound message"""
     speaker = messages.StringField(1, repeated=True)

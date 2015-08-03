@@ -683,7 +683,7 @@ class ConferenceApi(remote.Service):
             http_method='POST',
             name='getSessionsBySpeaker')
     def getSessionsBySpeaker(self, request):
-        """Query for session by type for a conferences."""
+        """Query for session by speaker across all conferences."""
         all_sessions = Session.query()
         sessions = all_sessions.filter(
             Session.speaker == request.speaker)
@@ -696,7 +696,7 @@ class ConferenceApi(remote.Service):
 # - - - Wishlists - - - - - - - - - - - - - - - - - - - -
 
     def _wishlistAddition(self, request, addition=True):
-        """Register or unregister user for selected conference."""
+        """Add or remove session from user wishlist"""
         
         retval = None  # return value
         prof = self._getProfileFromUser()  # get user Profile
@@ -882,6 +882,7 @@ class ConferenceApi(remote.Service):
                 )
 
     def _getSpeakers(self, wsck):
+        """get speakers for all sessions of a conference"""
         # get Conference object from request
         conf = ndb.Key(urlsafe=wsck).get()
         if not conf:
