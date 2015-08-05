@@ -629,6 +629,10 @@ class ConferenceApi(remote.Service):
         # create Conference & return (modified) ConferenceForm
         session = Session(**data)
         session.put()
+        # check if speaker is featured speaker to queue
+        taskqueue.add(params={'speaker': request.speaker, 'name': request.name,
+                              'wsck': request.websafeConferenceKey},
+                      url='/tasks/is_speaker_featured')
         return self._copySessionToForm(session)
 
     
@@ -636,11 +640,7 @@ class ConferenceApi(remote.Service):
             http_method='POST', name='createSession')
     def createSession(self, request):
         """Create new session in conference."""
-        # check if any speaker appear in more than one session for this conference
-        conferenceSpeakers = self._getSpeakers(request.websafeConferenceKey)
-        for speaker in request.speaker:
-            if speaker in conferenceSpeakers:
-                memcache.set('featuredSpeaker', (speaker, request.name))
+        
         return self._createSessionObject(request)
     
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
@@ -881,7 +881,8 @@ class ConferenceApi(remote.Service):
                 items=[self._copySessionToForm(session) for session in sessions]
                 )
 
-    def _getSpeakers(self, wsck):
+    @staticmethod
+    def _getSpeakers(wsck):
         """get speakers for all sessions of a conference"""
         # get Conference object from request
         conf = ndb.Key(urlsafe=wsck).get()
@@ -913,7 +914,7 @@ class ConferenceApi(remote.Service):
             http_method='GET', name='getFeaturedSpeaker')
     def getFeaturedSpeaker(self, request):
         """Returns the featured speaker stored in memcache"""
-        speaker, sessionName = memcache.get('featuredSpeaker') or ''
+        speaker, sessionName = memcache.get('featuredSpeaker') or ('','')
         # copy the list to a form
         form = StringMessage(data=speaker+' - '+sessionName)
         form.check_initialized()
