@@ -32,11 +32,13 @@ class IsSpeakerFeaturedHandler(webapp2.RequestHandler):
         """Check if speaker should be featured speaker and if so update the
         featuredSpeaker in memcache"""
         # check if any speaker appear in more than one session for this conference
-        conferenceSpeakers = ConferenceApi._getSpeakers(self.request.get('wsck'))
-        speakers = self.request.get_all('speaker')
-        for speaker in speakers:
-            if conferenceSpeakers.count(speaker) > 1:
-                memcache.set('featuredSpeaker', (speaker, self.request.get('name')))
+        conferenceSpeakerKeys = ConferenceApi._getSpeakerKeys(self.request.get('wsck'))
+        speakerKeys = self.request.get_all('sk')
+        for speakerKey in speakerKeys:
+            if conferenceSpeakerKeys.count(speakerKey) > 1:
+                memcache.set('featuredSpeaker',
+                             (ConferenceApi._getSpeakerName(speakerKey),
+                              self.request.get('name')))
 
 logging.getLogger().setLevel(logging.DEBUG)
 

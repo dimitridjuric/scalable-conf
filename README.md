@@ -7,16 +7,16 @@
 
 I've added a Session ndb class to models.py.
 The fields are:
-+ **name**, **speaker**, **session_type** and **location** are StringProperty type. we want these fields to be indexed. 
-+ **speaker** is repeated as there can be multiple speakers for a session.
++ **name**, **speakerKeys**, **session_type** and **location** are StringProperty type. we want these fields to be indexed. 
++ **speakerKeys** is repeated as there can be multiple speakers for a session, speakers need to be created to get this key.
 + **highlights** is of TextProperty type, we don't need this field to be indexed.
-+ **start_time** is an IntegerProperty type. I've tried to use a TimeProperty but ran into problems as ndb saves those differently to a standard python datetime.time(). This added complexity and made the application harder to maintain with a lot of code just used to convert times for the queries. I'm using an integer representation of 24h time HHMM (e.g 1245 is 12:45).
++ **start_time** is an IntegerProperty type. I've tried to use a TimeProperty but ran into problems as ndb saves those differently to a standard python datetime.time(). This added complexity and made the application harder to maintain with a lot of code just used to convert times for the queries. I'm using an integer representation of 24h time HHMM (e.g. 1245 is 12:45).
 + **date** is a DateProperty 
 + **duration** is IntegerProperty in number of minutes.
 
-The ProtoRPC message classes are **SessionForm** a copy of the session class in string format, and **SessionForms** a repeated SessionForm message.
+The ProtoRPC message classes are **SessionFormIn** a copy of the session class in string format, **SessionFormOut** the outbound message form, where the speakers names are added to improve human readability, and **SessionForms** a repeated SessionFormOut message.
 
-I've decided not to implement the speaker as a separate class because the speaker entity would have to be created prior to creating the session, not something I find particularly user friendly. Speaker is a repeated string property of the Session class 
+I've implemented speakers as a new entity. Speakers must be created with **createSpeaker** before being used in a session. Speakers have a name and one or more organisations.
 
 #### Endpoints
 
@@ -26,7 +26,11 @@ I've decided not to implement the speaker as a separate class because the speake
 
 **getConferenceByType** is a query with a filter on **session_type**
 
-**getSessionBySpeaker** is also a query with filter across all sessions of all conferences. 
+**getSessionBySpeaker** is also a query with filter across all sessions of all conferences.
+
+**createSpeaker** creates a new speaker, speakers have no parents, and can be created by any user. This allows speakers to be used in different conferences.
+
+**getSpeaker** returns the speaker's information.
 
 
 
@@ -37,7 +41,7 @@ where we add the session keys.
 
 #### Endpoints
 
-**addSessionToWishlist** takes a session key in the url path. It calls **_wishlistAddition**. This function gets the profile of the registed user, checks if the session is in the wishlist and appends the websafe session key to the list. **_wishlistAddition** also takes an optional argument - **addition**, if set to False it removes the sessionKey from the wishlist. This is used by the **removeSessionFromWishlist** endpoint.
+**addSessionToWishlist** takes a session key in the url path. It calls **_wishlistAddition**. This function gets the profile of the registed user, checks if the session is in the wish-list and appends the websafe session key to the list. **_wishlistAddition** also takes an optional argument - **addition**, if set to False it removes the sessionKey from the wishlist. This is used by the **removeSessionFromWishlist** endpoint.
 
 **getSessionInWishlist** returns the list of sessions in the user's wishlist.
 
@@ -57,12 +61,12 @@ The **doubleQuerySession** endpoint is a solution to the query problem. For this
 
 #### Index
 
-Since **doubleQuerySession** queries on multiple properties we need to make sure the multi-property indices are built and listed in index.yaml. I've run queries on each pair of properties on the local developement server. This is a bit tedious but is a good way to test the app.
+Since **doubleQuerySession** queries on multiple properties we need to make sure the multi-property indices are built and listed in index.yaml. I've run queries on each pair of properties on the local development server. This is a bit tedious but is a good way to test the app.
 
 
 ## Featured Speaker
 
-For this functionality, I've added some code to **createSession**. When a new session is created, each speaker for this session is checked. If the speaker is already in another session he becomes the featured speaker. We store the featured speaker and session name in memcache.
+For this functionality, I've added a line to **_createSessionObject**. When a new session is created, it adds a task to the taskqueue: **is_speaker_featured**. When this task is executed, each speaker for the newly created session is checked, if the speaker is already in another session he becomes the featured speaker. The featured speaker and session name are stored in memcache.
 
 To get all the speakers for a conference we use **_getSpeakers**. This function gets all the speakers for a conference. I've also added another endpoint using this function **getConferenceSpeakers**.
 

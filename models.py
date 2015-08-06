@@ -123,15 +123,26 @@ class Session(ndb.Model):
     """Session of a conference object"""
     name = ndb.StringProperty(required=True)
     highlights = ndb.TextProperty()
-    speaker = ndb.StringProperty(repeated=True)
+    speakerKeys = ndb.StringProperty(repeated=True)
     start_time = ndb.IntegerProperty()
     date = ndb.DateProperty()
     duration = ndb.IntegerProperty()
     session_type = ndb.StringProperty()
     location = ndb.StringProperty()
     
-class SessionForm(messages.Message):
-    """SessionForm -- Session outbound form message"""
+class SessionFormIn(messages.Message):
+    """SessionFormIn -- Session inbound form message"""
+    name = messages.StringField(1)
+    highlights = messages.StringField(2)
+    speakerKeys = messages.StringField(3, repeated=True)
+    start_time = messages.StringField(4)
+    date = messages.StringField(5)
+    duration = messages.IntegerField(6)
+    session_type = messages.StringField(7)
+    location = messages.StringField(8)
+    
+class SessionFormOut(messages.Message):
+    """SessionFormOut -- Session outbound form message"""
     name = messages.StringField(1)
     highlights = messages.StringField(2)
     speaker = messages.StringField(3, repeated=True)
@@ -140,10 +151,11 @@ class SessionForm(messages.Message):
     duration = messages.IntegerField(6)
     session_type = messages.StringField(7)
     location = messages.StringField(8)
+    sessionKey = messages.StringField(9)
     
 class SessionForms(messages.Message):
     """SessionForms -- multiple Session outbound form message"""
-    items = messages.MessageField(SessionForm, 1, repeated=True)
+    items = messages.MessageField(SessionFormOut, 1, repeated=True)
     
 class SessionTypeForm(messages.Message):
     """SessionTypeForm -- Session type query inbound form message"""
@@ -151,7 +163,7 @@ class SessionTypeForm(messages.Message):
 
 class SessionSpeakerForm(messages.Message):
     """form for queries of sessions by speaker"""
-    speaker = messages.StringField(1)
+    speakerKey = messages.StringField(1)
     
 class SessionQueryForm(messages.Message):
     """Session query inbound form message"""
@@ -173,3 +185,14 @@ class DoubleSessionQueryForm(messages.Message):
 class SpeakersForm(messages.Message):
     """Session speaker list outbound message"""
     speaker = messages.StringField(1, repeated=True)
+    
+class Speaker(ndb.Model):
+    """Session speaker object"""
+    name = ndb.StringProperty(required=True)
+    organisation = ndb.StringProperty(repeated=True)
+    
+class SpeakerForm(messages.Message):
+    """Speaker form message"""
+    name = messages.StringField(1, required=True)
+    organisation = messages.StringField(2, repeated=True)
+    speakerKey = messages.StringField(3)

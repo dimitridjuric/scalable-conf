@@ -174,6 +174,23 @@ indexes:
 - kind: Session
   ancestor: yes
   properties:
+  - name: speakerKeys
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: speakerKeys
+  - name: start-time
+
+- kind: Session
+  ancestor: yes
+  properties:
+  - name: speakerKeys
+  - name: start_time
+
+- kind: Session
+  ancestor: yes
+  properties:
   - name: start-time
 
 - kind: Session
