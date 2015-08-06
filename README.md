@@ -20,7 +20,7 @@ I've implemented speakers as a new entity. Speakers must be created with **creat
 
 #### Endpoints
 
-**createSession** has the same structure as **createConference**. I use a **_createSessionObject** function to get the user profile and the conference object. The conference is the parent of the session which makes querying for all sessions of a conference easy with an ancestor query. I check if the session date is within the dates of the conference. I put the **getFeaturedSpeaker** code in **createConference** as well, this will be discussed later.
+**createSession** has the same structure as **createConference**. I use a **_createSessionObject** function to get the user profile and the conference object. The conference is the parent of the session which makes querying for all sessions of a conference easy with an ancestor query. I check if the session date is within the dates of the conference. After storing the session, a task is added for the featured speaker functionality, this is discussed later.
 
 **getConferenceSessions** is a straightforward ancestor query with ordering by date and time. It takes a websafe conference key in the url path.
 
@@ -28,7 +28,7 @@ I've implemented speakers as a new entity. Speakers must be created with **creat
 
 **getSessionBySpeaker** is also a query with filter across all sessions of all conferences.
 
-**createSpeaker** creates a new speaker, speakers have no parents, and can be created by any user. This allows speakers to be used in different conferences.
+**createSpeaker** creates a new speaker, speakers have no parents, and can be created and used by any user. This allows speakers to be used in different conferences.
 
 **getSpeaker** returns the speaker's information.
 
